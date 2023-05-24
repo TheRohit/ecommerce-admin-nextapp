@@ -3,6 +3,7 @@ import { set } from "mongoose";
 import { Router, useRouter } from "next/router";
 import { useState } from "react";
 import Spinner from "./Spinner";
+import { ReactSortable } from "react-sortablejs";
 export default function ProductForm({
   _id,
   title: existingTitle,
@@ -51,6 +52,9 @@ export default function ProductForm({
     }
   }
 
+  function updateImagesOrder(images) {
+    setImages(images);
+  }
   return (
     <form onSubmit={createProduct}>
       <label>Product name</label>
@@ -62,13 +66,18 @@ export default function ProductForm({
       />
       <label>Photos</label>
       <div className="mb-2 flex flex-wrap gap-1">
-        {!!images?.length &&
-          images.map((link) => (
-            <div key={link} className=" h-24 ">
-              <img src={link} alt="" className="rounded-lg" />
-            </div>
-          ))}
-
+        <ReactSortable
+          list={images}
+          setList={updateImagesOrder}
+          className="flex flex-wrap gap-1"
+        >
+          {!!images?.length &&
+            images.map((link) => (
+              <div key={link} className=" h-24 ">
+                <img src={link} alt="" className="rounded-lg" />
+              </div>
+            ))}
+        </ReactSortable>
         {isuploading && (
           <div className="h-24 p-1 flex items-center ">
             <Spinner />
