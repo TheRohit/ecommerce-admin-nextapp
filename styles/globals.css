@@ -49,3 +49,7 @@ table.basic a {
 .btn-default {
     @apply bg-blue-900 text-white px-4 py-1 rounded-md;
 }
+
+img{
+    max-height: 100%;
+}
