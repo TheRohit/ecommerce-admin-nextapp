@@ -9,12 +9,12 @@ export default function ProductForm({
   title: existingTitle,
   description: existingDescription,
   price: existingPrice,
-  images: existingImages,
+  images: existingImages, 
 }) {
   const [title, setTitle] = useState(existingTitle || "");
   const [description, setDescription] = useState(existingDescription || "");
   const [price, setPrice] = useState(existingPrice || "");
-  const [images, setImages] = useState(existingImages || []); // ["url1", "url2"
+  const [images, setImages] = useState(existingImages || []); // "url1", "url2"
   const [goToProduct, setGoToProduct] = useState(false);
   const [isuploading, setIsUploading] = useState(false);
   const router = useRouter();
