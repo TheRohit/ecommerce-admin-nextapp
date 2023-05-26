@@ -9,5 +9,5 @@ const CategorySchema = new Schema(
     }
 );
 
-// Export the Category model, creating it if it doesn't exist
+// Export the Category model, creating it if it doesn't exist yess
 export const Category =models?.Category || model('Category', CategorySchema);
