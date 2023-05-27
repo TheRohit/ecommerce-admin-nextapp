@@ -6,6 +6,7 @@ const CategorySchema = new Schema(
     {
         // The name of the category, which is a required string
         name: {type: String, required : true},
+        parent : {type: mongoose.Types.ObjectId},
     }
 );
 
