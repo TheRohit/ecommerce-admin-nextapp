@@ -3,6 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 
 export default function Categories() {
+    const [editedCategory, setEditedCategory] = useState(null)
     const [name, setName] = useState('');
     const [categories, setCategories] = useState([]);
     const [parentCategory, setParentCategory] = useState('');
@@ -15,11 +16,28 @@ export default function Categories() {
             setCategories(result.data);
         })
     }
+
+
    async function saveCategory(ev){
         ev.preventDefault();
-        await axios.post('/api/categories',{name, parentCategory});
+        const data= {name, parentCategory};
+        if(editedCategory){
+            data._id= editedCategory._id;
+            await axios.put('/api/categories',data);
+            setEditedCategory(null);
+        }
+        else{
+            await axios.post('/api/categories',data);
+        }
+        
         setName('');
         fetchCategories()
+    }
+    function editCategory(category){
+        setEditedCategory(category);
+        setName(category.name);
+        setParentCategory(category.parent?._id);
+         
     }
     
     return(
@@ -28,7 +46,11 @@ export default function Categories() {
             <h1>
                 Categories
             </h1>
-            <label>New Category Name</label>
+            <label>
+            {editedCategory 
+            ? `Edit Category ${editedCategory.name}`
+            : 'New Category Name'}
+            </label>
             <form onSubmit={saveCategory} className="flex gap-1">
             <input 
             className="my-0"
@@ -60,6 +82,18 @@ export default function Categories() {
                  {categories.length > 0 && categories.map(category => (
                     <tr>
                         <td>{category.name}</td>
+                        <td>{category?.parent?.name}</td>
+                        <td >
+                        <div className="flex">
+                            <button 
+                            onClick={() => editCategory(category)} 
+                            className ="btn-primary mr-1"
+                            >
+                            Edit
+                            </button>
+                            <button className="btn-primary">Delete</button>
+                            </div>
+                        </td>
                     </tr>
                  ))} 
                 </tbody>
