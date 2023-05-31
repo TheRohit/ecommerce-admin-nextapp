@@ -6,8 +6,9 @@ import { withSwal } from "react-sweetalert2";
  function Categories({swal}) {
     const [editedCategory, setEditedCategory] = useState(null)
     const [name, setName] = useState('');
-    const [categories, setCategories] = useState([]);
     const [parentCategory, setParentCategory] = useState('');
+    const [categories, setCategories] = useState([]);
+    const [properties, setProperties]= useState([]);
     useEffect(() => {
         fetchCategories()
     } , [] )
@@ -21,7 +22,13 @@ import { withSwal } from "react-sweetalert2";
 
    async function saveCategory(ev){
         ev.preventDefault();
-        const data= {name, parentCategory};
+        const data= {name,
+             parentCategory,
+             properties:properties.map(p => ({
+                name:p.name,
+                values:p.values.split(','),
+            })),
+            };
         if(editedCategory){
             data._id= editedCategory._id;
             await axios.put('/api/categories',data);
@@ -32,12 +39,20 @@ import { withSwal } from "react-sweetalert2";
         }
         
         setName('');
+        setParentCategory('');
+        setProperties([]);
         fetchCategories()
     }
     function editCategory(category){
         setEditedCategory(category);
         setName(category.name);
         setParentCategory(category.parent?._id);
+        setProperties(category.properties.map(({name,values}) =>({
+            name,
+            values: values.join(',')
+
+        }))
+        );
          
     }
 
@@ -67,6 +82,39 @@ import { withSwal } from "react-sweetalert2";
         });
     }
     
+   function addProperty(){
+    setProperties(prev => {
+        return [...prev, {name:'',values:''}];
+    });
+   }
+
+   function handlePropertyNameChange(index,property,newName){
+     setProperties(prev => {
+        const properties=[...prev];
+        properties[index].name = newName;
+        return properties;
+     });
+    }
+
+    function handlePropertyValuesChange(index,property,newValues){
+        setProperties(prev => {
+           const properties=[...prev];
+           properties[index].values = newValues;
+           return properties;
+        });
+    
+   }
+
+   function removeProperty(indexToRemove){
+    setProperties(prev =>{
+       
+        return [...prev].filter((p,pIndex) => {
+            return pIndex !== indexToRemove;
+            
+        })
+        
+    });
+   }
     return(
         
         <Layout>
@@ -78,16 +126,16 @@ import { withSwal } from "react-sweetalert2";
             ? `Edit Category ${editedCategory.name}`
             : 'New Category Name'}
             </label>
-            <form onSubmit={saveCategory} className="flex gap-1">
-            
+            <form onSubmit={saveCategory} >
+            <div className="flex gap-1">
             <input 
-            className="my-0"
+            
             type="text"
             placeholder={"Category Name"} 
             onChange={(e) => setName(e.target.value)}
             value={name}    
             />
-            <select className="my-0" 
+            <select 
             onChange={ev => setParentCategory(ev.target.value)}
             value={parentCategory}
             >
@@ -97,10 +145,60 @@ import { withSwal } from "react-sweetalert2";
                  ))} 
 
             </select>
-            <button type="submit" className="btn-primary py-1">Submit</button>
-            </form>
+            </div>
+            <div className="mb-2">
+                <label className="block">Properties</label>
+                <button 
+                onClick={addProperty}
+                type="button" 
+                className="btn-default text-sm mb-2">Add new property</button>
+                {properties.length >0 && properties.map((property,index) =>(
+                    <div className="flex gap-1 mb-2">
+                        <input type="text" 
+                        className="mb-0"
+                            value={property.name} 
+                            onChange={(ev)=> handlePropertyNameChange(
+                                index,property,
+                                ev.target.value)}
+                            placeholder="property name (example:color)" />
+                        <input type="text" 
+                        className="mb-0"
+                            value={property.values} 
+                            onChange={(ev)=> handlePropertyValuesChange(index,property,ev.target.value)}
+                            placeholder="values, comma seperated" />
+
+                            <button
+                            onClick={()=> removeProperty(index)}
+                            type="button"
+                             className="btn-default">Remove</button>
+                    </div>
+                ))}
+
+            </div>
+            <div className="flex gap-1">
+            {editedCategory && (
+                <button
+                type="button"
+                onClick={()=>{
+                    setEditedCategory(null);
+                    setName('');
+                    setParentCategory('');
+                    setProperties([]);
+                }} 
+                className="btn-default">Cancel</button>
+            )}
             
-            <table className="basic mt-4">
+            <button
+            
+            type="submit" 
+            className="btn-primary py-1">
+            Save
+            </button>
+            </div>
+            
+            </form>
+            {!editedCategory && (
+                <table className="basic mt-4">
                 <thead>
                 <tr>
                 <td> Category Name</td>
@@ -128,6 +226,8 @@ import { withSwal } from "react-sweetalert2";
                  ))} 
                 </tbody>
             </table>
+            )}
+           
         </Layout>
     )
 
@@ -137,4 +237,4 @@ export default withSwal(({swal},ref) =>
 (<Categories swal={swal} />
  ));
 
-
+ 
