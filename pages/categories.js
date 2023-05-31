@@ -1,8 +1,9 @@
 import Layout from "@/components/Layout";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { withSwal } from "react-sweetalert2";
 
-export default function Categories() {
+ function Categories({swal}) {
     const [editedCategory, setEditedCategory] = useState(null)
     const [name, setName] = useState('');
     const [categories, setCategories] = useState([]);
@@ -39,6 +40,32 @@ export default function Categories() {
         setParentCategory(category.parent?._id);
          
     }
+
+    function deleteCategory(category){
+        swal.fire({
+            title: 'Are you sure bruh?',
+            text: `Do you want to bonk ${category.name}?` ,
+            showCancelButton:true,
+            cancelButtonText:'Cancel',
+            confirmButtonText:'Yes,Delete!',
+            confirmButtonColor:'#d55',
+            reverseButtons:true
+
+            
+
+
+            
+        }).then(async result => {
+            // when confirmed and promise resolved...
+            if(result.isConfirmed){
+                const {_id}=category;
+                await axios.delete('/api/categories?_id='+ _id);
+                fetchCategories();
+            }
+
+
+        });
+    }
     
     return(
         
@@ -52,6 +79,7 @@ export default function Categories() {
             : 'New Category Name'}
             </label>
             <form onSubmit={saveCategory} className="flex gap-1">
+            
             <input 
             className="my-0"
             type="text"
@@ -91,7 +119,9 @@ export default function Categories() {
                             >
                             Edit
                             </button>
-                            <button className="btn-primary">Delete</button>
+                            <button 
+                            onClick={()=> deleteCategory(category)}
+                            className="btn-primary">Delete</button>
                             </div>
                         </td>
                     </tr>
@@ -102,4 +132,9 @@ export default function Categories() {
     )
 
 }
+
+export default withSwal(({swal},ref) => 
+(<Categories swal={swal} />
+ ));
+
 
